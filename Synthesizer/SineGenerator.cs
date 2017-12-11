@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace Synthesizer
 {
-    public sealed class SineGenerator : ISampleProvider
+    public sealed class SineGenerator : ISampleSource
     {
         private int _sampleIndex;
         private double _previousSampleFrequency = double.NaN;
@@ -10,51 +11,42 @@ namespace Synthesizer
 
         public double Frequency { get; set; } = 440;
 
-        public int NumberOfChannels { get; }
-        public int SampleRate { get; }
+        private int SampleRate { get; }
 
-        public SineGenerator(int numberOfChannels, int sampleRate)
+        public SineGenerator(int sampleRate)
         {
-            NumberOfChannels = numberOfChannels;
             SampleRate = sampleRate;
         }
 
-        public int Read(AudioBuffer buffer)
-        {
-            for (var i = 0; i < buffer.SamplesPerChannel; i++)
-            {
-                ReadSample(buffer, i);
-            }
-
-            return buffer.Length;
-        }
-
-        private void ReadSample(AudioBuffer buffer, int currentBufferSampleIndex)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public float ReadNextSample()
         {
             // save the frequency, so it does not change during the computation of the current sample
             var frequency = Frequency;
 
-            if (FrequencyChanged(frequency))
+            if (HasFrequencyChanged(frequency))
             {
                 UpdatePhaseShift(frequency);
             }
 
             EnsureMinimalSampleIndex(frequency);
-            buffer.WriteToAllChannels(currentBufferSampleIndex, (float)CalculateSample(frequency));
+            var sample = (float)CalculateSample(frequency);
 
             _previousSampleFrequency = frequency;
             ++_sampleIndex;
+
+            return sample;
         }
 
-        private bool FrequencyChanged(double frequency)
+        private bool HasFrequencyChanged(double frequency)
         {
-            return !double.IsNaN(_previousSampleFrequency) 
-                   && Math.Abs(frequency - _previousSampleFrequency) > double.Epsilon;
+            return !double.IsNaN(_previousSampleFrequency)
+                   && Math.Abs(frequency - _previousSampleFrequency) > 1E-9;
         }
 
         private void UpdatePhaseShift(double frequency)
         {
-            _phaseShift += CalculatePhaseShiftBetweeenFrequencies(SampleRate, frequency);
+            _phaseShift += CalculatePhaseShiftBetweeenFrequencies(_previousSampleFrequency, frequency);
 
             if (_phaseShift >= Math.PI * 2)
             {
@@ -69,17 +61,17 @@ namespace Synthesizer
 
         private void EnsureMinimalSampleIndex(double frequency)
         {
-            if (Math.Abs(_sampleIndex * frequency - SampleRate) < double.Epsilon)
+            if (Math.Abs(_sampleIndex * frequency - SampleRate) < 1E-9)
             {
                 _sampleIndex = 0;
             }
         }
 
-        private double CalculatePhaseShiftBetweeenFrequencies(double sampleRate, double frequency)
+        private double CalculatePhaseShiftBetweeenFrequencies(double previousFrequency, double frequency)
         {
-            var time = (_sampleIndex - 1) / sampleRate;
+            var time = (_sampleIndex - 1) / (double)SampleRate;
 
-            return 2 * Math.PI * time * (_previousSampleFrequency - frequency);
+            return 2 * Math.PI * time * (previousFrequency - frequency);
         }
     }
 }
