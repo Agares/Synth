@@ -13,16 +13,20 @@ namespace Synthesizer.Tests
         [Fact]
         public void TestGeneratesASineInEmptyBuffer()
         {
-            ISampleSource generator = new SineGenerator(44100) {Frequency = 440};
-            float[] buffer = new float[22050];
+            ISampleSource generator = new SineGenerator(
+                44100, 
+                new ConstantSampleSource(440.0f),
+                new ConstantSampleSource(1.0f)
+            );
+            var buffer = new float[22050];
 
-            for (int i = 0; i < buffer.Length; i++)
+            for (var i = 0; i < buffer.Length; i++)
             {
                 buffer[i] = generator.ReadNextSample();
             }
 
-            string actual = ToReadableString(buffer);
-            string expected = File.ReadAllText(GetTestFileName());
+            var actual = ToReadableString(buffer);
+            var expected = File.ReadAllText(GetTestFileName());
 
             Assert.Equal(expected, actual);
         }
@@ -33,13 +37,18 @@ namespace Synthesizer.Tests
             [CallerMemberName] string callerMemberName = null
         )
         {
-            string directoryName = Path.GetDirectoryName(callerFilePath);
-            string fileName = GetType().Name + "." + callerMemberName + "." + kind + ".txt";
-
+            var directoryName = Path.GetDirectoryName(callerFilePath);
+            if (directoryName == null)
+            {
+                throw new ArgumentException(nameof(callerFilePath));
+            }
+            
+            var fileName = GetType().Name + "." + callerMemberName + "." + kind + ".txt";
+            
             return Path.Combine(directoryName, fileName);
         }
 
-        private string ToReadableString(IEnumerable<float> buffer)
+        private static string ToReadableString(IEnumerable<float> buffer)
         {
             var builder = new StringBuilder(22050 * 14);
 

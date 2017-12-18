@@ -1,8 +1,8 @@
 ﻿using NAudio.Wave;
 
-namespace Synthesizer.CLI
+namespace Synthesizer.NAudio
 {
-    internal sealed class NAudioSampleProvider : NAudio.Wave.ISampleProvider
+    public sealed class NAudioSampleProvider : global::NAudio.Wave.ISampleProvider
     {
         public WaveFormat WaveFormat { get; }
 

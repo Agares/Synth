@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synthesizer", "Synthesizer\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synthesizer.Tests", "Synthesizer.Tests\Synthesizer.Tests.csproj", "{358FC122-76DC-4BD2-B958-DAAB36219AA9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synthesizer.NAudio", "Synthesizer.NAudio\Synthesizer.NAudio.csproj", "{B24527AD-9DBF-417F-A66F-CA2C6144D688}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{358FC122-76DC-4BD2-B958-DAAB36219AA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{358FC122-76DC-4BD2-B958-DAAB36219AA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{358FC122-76DC-4BD2-B958-DAAB36219AA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B24527AD-9DBF-417F-A66F-CA2C6144D688}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B24527AD-9DBF-417F-A66F-CA2C6144D688}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B24527AD-9DBF-417F-A66F-CA2C6144D688}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B24527AD-9DBF-417F-A66F-CA2C6144D688}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

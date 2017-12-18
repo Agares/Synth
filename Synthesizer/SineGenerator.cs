@@ -9,20 +9,23 @@ namespace Synthesizer
         private double _previousSampleFrequency = double.NaN;
         private double _phaseShift;
 
-        public double Frequency { get; set; } = 440;
+        private readonly ISampleSource _frequencySource;
+        private readonly ISampleSource _amplitudeSource;
 
         private int SampleRate { get; }
 
-        public SineGenerator(int sampleRate)
+        public SineGenerator(int sampleRate, ISampleSource frequencySource, ISampleSource amplitudeSource)
         {
             SampleRate = sampleRate;
+            _frequencySource = frequencySource;
+            _amplitudeSource = amplitudeSource;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public float ReadNextSample()
         {
-            // save the frequency, so it does not change during the computation of the current sample
-            var frequency = Frequency;
+            var frequency = _frequencySource.ReadNextSample();
+            var amplitude = _amplitudeSource.ReadNextSample();
 
             if (HasFrequencyChanged(frequency))
             {
@@ -30,7 +33,7 @@ namespace Synthesizer
             }
 
             EnsureMinimalSampleIndex(frequency);
-            var sample = (float)CalculateSample(frequency);
+            var sample = amplitude * (float)CalculateSample(frequency);
 
             _previousSampleFrequency = frequency;
             ++_sampleIndex;
