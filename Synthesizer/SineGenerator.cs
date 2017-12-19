@@ -8,15 +8,16 @@ namespace Synthesizer
         private int _sampleIndex;
         private double _previousSampleFrequency = double.NaN;
         private double _phaseShift;
+        
+        private readonly OutputFormat _outputFormat;
 
         private readonly ISampleSource _frequencySource;
         private readonly ISampleSource _amplitudeSource;
 
-        private int SampleRate { get; }
-
-        public SineGenerator(int sampleRate, ISampleSource frequencySource, ISampleSource amplitudeSource)
+        public SineGenerator(OutputFormat outputFormat, ISampleSource frequencySource, ISampleSource amplitudeSource)
         {
-            SampleRate = sampleRate;
+            // todo how do we handle multiple channels here?
+            _outputFormat = outputFormat;
             _frequencySource = frequencySource;
             _amplitudeSource = amplitudeSource;
         }
@@ -59,12 +60,12 @@ namespace Synthesizer
 
         private double CalculateSample(double frequency)
         {
-            return Math.Sin(_sampleIndex / (double)SampleRate * 2.0 * Math.PI * frequency + _phaseShift);
+            return Math.Sin((double)_sampleIndex / _outputFormat.SampleRate * 2.0 * Math.PI * frequency + _phaseShift);
         }
 
         private void EnsureMinimalSampleIndex(double frequency)
         {
-            if (Math.Abs(_sampleIndex * frequency - SampleRate) < 1E-9)
+            if (Math.Abs(_sampleIndex * frequency - _outputFormat.SampleRate) < 1E-9)
             {
                 _sampleIndex = 0;
             }
@@ -72,7 +73,7 @@ namespace Synthesizer
 
         private double CalculatePhaseShiftBetweeenFrequencies(double previousFrequency, double frequency)
         {
-            var time = (_sampleIndex - 1) / (double)SampleRate;
+            var time = (_sampleIndex - 1.0) / _outputFormat.SampleRate;
 
             return 2 * Math.PI * time * (previousFrequency - frequency);
         }

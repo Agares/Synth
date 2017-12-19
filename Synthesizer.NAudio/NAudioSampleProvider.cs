@@ -8,10 +8,10 @@ namespace Synthesizer.NAudio
 
         private readonly ISampleProvider _sampleProvider;
 
-        public NAudioSampleProvider(ISampleProvider sampleProvider)
+        public NAudioSampleProvider(ISampleProvider sampleProvider, OutputFormat outputFormat)
         {
             _sampleProvider = sampleProvider;
-            WaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(44100, 1);
+            WaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(outputFormat.SampleRate, outputFormat.NumberOfChannels);
         }
 
         public int Read(float[] buffer, int offset, int count)

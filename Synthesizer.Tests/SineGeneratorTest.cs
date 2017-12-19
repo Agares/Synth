@@ -14,7 +14,7 @@ namespace Synthesizer.Tests
         public void TestGeneratesASineInEmptyBuffer()
         {
             ISampleSource generator = new SineGenerator(
-                44100, 
+                new OutputFormat(new SampleRate(44100), 1), 
                 new ConstantSampleSource(440.0f),
                 new ConstantSampleSource(1.0f)
             );
