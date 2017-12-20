@@ -2,7 +2,6 @@
 using System.Threading;
 using NAudio.Midi;
 using NAudio.Wave;
-using NAudio.Wave.SampleProviders;
 using Synthesizer.NAudio;
 
 namespace Synthesizer.CLI
@@ -18,11 +17,7 @@ namespace Synthesizer.CLI
             var frequencySampleSource = new MidiDataSampleSource(midiIn);
             var sampleRate            = new SampleRate(44100);
             var outputFormat = new OutputFormat(sampleRate, 1);
-            var amplitudeSampleSource = new SineGenerator(
-                outputFormat, 
-                new ConstantSampleSource(0.5f), 
-                new ConstantSampleSource(0.2f)
-            );
+            var amplitudeSampleSource = new ConstantSampleSource(0.5f);
             var sampleSource          = new SineGenerator(outputFormat, frequencySampleSource, amplitudeSampleSource);
             var sampleProvider        = new SampleSourceSampleProvider(sampleSource);
             var nAudioSampleProvider  = new NAudioSampleProvider(sampleProvider, outputFormat);

@@ -6,10 +6,13 @@ namespace Synthesizer
     public sealed class SineGenerator : ISampleSource
     {
         private int _sampleIndex;
-        private double _previousSampleFrequency = double.NaN;
-        private double _phaseShift;
-        
-        private readonly OutputFormat _outputFormat;
+        private float _previousSampleFrequency = float.NaN;
+        private float _phaseShift;
+
+        private const float TwoPi = (float) (Math.PI * 2);
+        private const double Epsilon = 1E-9;
+
+        private readonly float _sampleRate;
 
         private readonly ISampleSource _frequencySource;
         private readonly ISampleSource _amplitudeSource;
@@ -17,7 +20,7 @@ namespace Synthesizer
         public SineGenerator(OutputFormat outputFormat, ISampleSource frequencySource, ISampleSource amplitudeSource)
         {
             // todo how do we handle multiple channels here?
-            _outputFormat = outputFormat;
+            _sampleRate = outputFormat.SampleRate;
             _frequencySource = frequencySource;
             _amplitudeSource = amplitudeSource;
         }
@@ -34,7 +37,7 @@ namespace Synthesizer
             }
 
             EnsureMinimalSampleIndex(frequency);
-            var sample = amplitude * (float)CalculateSample(frequency);
+            var sample = amplitude * CalculateSample(frequency);
 
             _previousSampleFrequency = frequency;
             ++_sampleIndex;
@@ -42,40 +45,39 @@ namespace Synthesizer
             return sample;
         }
 
-        private bool HasFrequencyChanged(double frequency)
+        private bool HasFrequencyChanged(float frequency)
         {
-            return !double.IsNaN(_previousSampleFrequency)
-                   && Math.Abs(frequency - _previousSampleFrequency) > 1E-9;
+            return Math.Abs(frequency - _previousSampleFrequency) > Epsilon;
         }
 
-        private void UpdatePhaseShift(double frequency)
+        private void UpdatePhaseShift(float frequency)
         {
             _phaseShift += CalculatePhaseShiftBetweeenFrequencies(_previousSampleFrequency, frequency);
 
-            if (_phaseShift >= Math.PI * 2)
+            if (_phaseShift >= TwoPi)
             {
-                _phaseShift -= Math.PI * 2;
+                _phaseShift -= TwoPi;
             }
         }
 
-        private double CalculateSample(double frequency)
+        private float CalculateSample(float frequency)
         {
-            return Math.Sin((double)_sampleIndex / _outputFormat.SampleRate * 2.0 * Math.PI * frequency + _phaseShift);
+            return (float)Math.Sin((float)_sampleIndex / _sampleRate * TwoPi * frequency + _phaseShift);
         }
 
-        private void EnsureMinimalSampleIndex(double frequency)
+        private void EnsureMinimalSampleIndex(float frequency)
         {
-            if (Math.Abs(_sampleIndex * frequency - _outputFormat.SampleRate) < 1E-9)
+            if (Math.Abs(_sampleIndex * frequency - _sampleRate) < Epsilon)
             {
                 _sampleIndex = 0;
             }
         }
 
-        private double CalculatePhaseShiftBetweeenFrequencies(double previousFrequency, double frequency)
+        private float CalculatePhaseShiftBetweeenFrequencies(float previousFrequency, float frequency)
         {
-            var time = (_sampleIndex - 1.0) / _outputFormat.SampleRate;
+            var time = (_sampleIndex - 1.0f) / _sampleRate;
 
-            return 2 * Math.PI * time * (previousFrequency - frequency);
+            return TwoPi * time * (previousFrequency - frequency);
         }
     }
 }
