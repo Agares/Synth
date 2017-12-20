@@ -20,7 +20,7 @@ namespace Synthesizer
 
         public static Note FromMidiNote(int midiNote)
         {
-            return new Note(midiNote/12, (Notes)(midiNote % 12)); 
+            return new Note((midiNote/12) - 1, (Notes)(midiNote % 12)); 
         }
     }
 }

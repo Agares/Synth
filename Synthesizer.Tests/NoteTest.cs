@@ -22,10 +22,11 @@ namespace Synthesizer.Tests
         }
 
         [Theory]
-        [InlineData(0, 16.3515978313f)]  // C0
-        [InlineData(12, 32.7031956626f)] // C1
-        [InlineData(11, 30.8677063285f)] // B0
-        [InlineData(1, 17.323914436f)]   // C#0
+        [InlineData(12, 16.3515978313f)]  // C0
+        [InlineData(24, 32.7031956626f)] // C1
+        [InlineData(23, 30.8677063285f)] // B0
+        [InlineData(13, 17.323914436f)]   // C#0
+        [InlineData(69, 440.0f)]
         public void CanConvertMidiNoteToFrequency(int midiNote, float frequency)
         {
             var note = Note.FromMidiNote(midiNote);
