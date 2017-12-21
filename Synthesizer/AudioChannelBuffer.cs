@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Synthesizer 
+﻿namespace Synthesizer 
 {
     public sealed class AudioChannelBuffer
     {

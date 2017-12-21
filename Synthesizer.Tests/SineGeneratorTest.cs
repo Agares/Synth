@@ -13,17 +13,15 @@ namespace Synthesizer.Tests
         [Fact]
         public void TestGeneratesASineInEmptyBuffer()
         {
-            ISampleSource generator = new SineGenerator(
+            ISampleProvider generator = new SineGenerator(
                 new OutputFormat(new SampleRate(44100), 1), 
                 new ConstantSampleSource(440.0f),
                 new ConstantSampleSource(1.0f)
             );
             var buffer = new float[22050];
+            var acb = AudioChannelBuffer.CreateFromRawBuffer(buffer, 0, buffer.Length);
 
-            for (var i = 0; i < buffer.Length; i++)
-            {
-                buffer[i] = generator.ReadNextSample();
-            }
+            generator.Read(acb);
 
             var actual = ToReadableString(buffer);
             var expected = File.ReadAllText(GetTestFileName());

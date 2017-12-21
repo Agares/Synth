@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace Synthesizer
 {
-    public sealed class SineGenerator : ISampleSource
+    public sealed class SineGenerator : ISampleProvider
     {
         private int _sampleIndex;
         private float _previousSampleFrequency = float.NaN;
@@ -14,10 +14,13 @@ namespace Synthesizer
 
         private readonly float _sampleRate;
 
-        private readonly ISampleSource _frequencySource;
-        private readonly ISampleSource _amplitudeSource;
+        private readonly ISampleProvider _frequencySource;
+        private readonly ISampleProvider _amplitudeSource;
 
-        public SineGenerator(OutputFormat outputFormat, ISampleSource frequencySource, ISampleSource amplitudeSource)
+        private AudioChannelBuffer _amplitudeBuffer;
+        private AudioChannelBuffer _frequencyBuffer;
+
+        public SineGenerator(OutputFormat outputFormat, ISampleProvider frequencySource, ISampleProvider amplitudeSource)
         {
             // todo how do we handle multiple channels here?
             _sampleRate = outputFormat.SampleRate;
@@ -25,24 +28,41 @@ namespace Synthesizer
             _amplitudeSource = amplitudeSource;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public float ReadNextSample()
+        public int Read(AudioChannelBuffer channelBuffer)
         {
-            var frequency = _frequencySource.ReadNextSample();
-            var amplitude = _amplitudeSource.ReadNextSample();
-
-            if (HasFrequencyChanged(frequency))
+            if (_amplitudeBuffer == null || _amplitudeBuffer.Length != channelBuffer.Length)
             {
-                UpdatePhaseShift(frequency);
+                _amplitudeBuffer = AudioChannelBuffer.CreateFromRawBuffer(new float[channelBuffer.Length], 0, channelBuffer.Length);
             }
 
-            EnsureMinimalSampleIndex(frequency);
-            var sample = amplitude * CalculateSample(frequency);
+            if (_frequencyBuffer == null || _frequencyBuffer.Length != channelBuffer.Length)
+            {
+                _frequencyBuffer = AudioChannelBuffer.CreateFromRawBuffer(new float[channelBuffer.Length], 0, channelBuffer.Length);
+            }
 
-            _previousSampleFrequency = frequency;
-            ++_sampleIndex;
+            _amplitudeSource.Read(_amplitudeBuffer);
+            _frequencySource.Read(_frequencyBuffer);
 
-            return sample;
+            for (int i = 0; i < channelBuffer.Length; i++)
+            {
+                var frequency = _frequencyBuffer[i];
+                var amplitude = _amplitudeBuffer[i];
+
+                if (HasFrequencyChanged(frequency))
+                {
+                    UpdatePhaseShift(frequency);
+                }
+
+                EnsureMinimalSampleIndex(frequency);
+                var sample = amplitude * CalculateSample(frequency);
+
+                _previousSampleFrequency = frequency;
+                ++_sampleIndex;
+
+                channelBuffer[i] = sample;
+            }
+
+            return channelBuffer.Length;
         }
 
         private bool HasFrequencyChanged(float frequency)

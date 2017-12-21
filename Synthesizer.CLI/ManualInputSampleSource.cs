@@ -1,17 +1,20 @@
 ﻿namespace Synthesizer.CLI
 {
-    public class ManualInputSampleSource : ISampleSource
+    public class ManualInputSampleSource : ISampleProvider
     {
-        public float Value { get; set; }
+        private volatile float _value;
+
+        public float Value { get => _value; set => _value = value; }
 
         public ManualInputSampleSource(float value)
         {
             Value = value;
-        }
+        }        public int Read(AudioChannelBuffer channelBuffer)        {
+            for (int i = 0; i < channelBuffer.Length; i++)
+            {
+                channelBuffer[i] = Value;
+            }
 
-        public float ReadNextSample()
-        {
-            return Value;
-        }
-    }
+            return channelBuffer.Length;
+        }    }
 }

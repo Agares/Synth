@@ -19,8 +19,7 @@ namespace Synthesizer.CLI
             var outputFormat = new OutputFormat(sampleRate, 1);
             var amplitudeSampleSource = new ConstantSampleSource(0.5f);
             var sampleSource          = new SineGenerator(outputFormat, frequencySampleSource, amplitudeSampleSource);
-            var sampleProvider        = new SampleSourceSampleProvider(sampleSource);
-            var nAudioSampleProvider  = new NAudioSampleProvider(sampleProvider, outputFormat);
+            var nAudioSampleProvider  = new NAudioSampleProvider(sampleSource, outputFormat);
             
             output.Init(nAudioSampleProvider);
             output.Play();

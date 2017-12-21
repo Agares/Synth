@@ -3,10 +3,10 @@ using NAudio.Midi;
 
 namespace Synthesizer.NAudio
 {
-    public class MidiDataSampleSource : ISampleSource
+    public class MidiDataSampleSource : ISampleProvider
     {
         private readonly MidiIn _midiInput;
-        private float _currentFrequency = 440.0f;
+        private volatile float _currentFrequency = 440.0f;
 
         public MidiDataSampleSource(MidiIn midiInput)
         {
@@ -23,9 +23,14 @@ namespace Synthesizer.NAudio
             _midiInput.ErrorReceived += (sender, args) => throw new Exception("Oh noes"); // todo some sane error handling i guess?
         }
 
-        public float ReadNextSample()
+        public int Read(AudioChannelBuffer channelBuffer)
         {
-            return _currentFrequency;
+            for (int i = 0; i < channelBuffer.Length; i++)
+            {
+                channelBuffer[i] = _currentFrequency;
+            }
+
+            return channelBuffer.Length;
         }
     }
 }
